@@ -1,16 +1,24 @@
 import data_collectors.dictionarycollector as dicts_col
 import representers.text_dictionary_representer
 from bs4 import BeautifulSoup
-import pprint
+import pandas as pd
+
+# TODO
+# * Idiom support
+# * check if word was not found
+# * load words from file
+# * ability to choose  definition
+# * much more ^_^
 
 if __name__ == '__main__':
-    print('Hello console!')
     test = dicts_col.Oxford_Word_Collector()
-    thing = test.get_data('home')
-    pprint.pprint('The thing is {}'.format(thing))
-    for defin in thing.data:
-        print(defin.get_data())
-    representer = representers.text_dictionary_representer.Data_Definition_html_representer(thing)
-    representer.to_text('test.txt')
- #   print(test.get_data('home'))
-#    print(test.raw_html)
+    words = pd.read_csv('input.csv',',')
+    print(words)
+    things = test.load_words(words.loc[:,'word'].tolist())
+    all_data = []
+    for thing in things:
+        with pd.option_context('display.max_rows', None, 'display.max_columns', 10):
+            print(thing.get_data_as_df())
+        repr = representers.text_dictionary_representer.Data_Definition_html_representer(
+            thing.get_data_as_df())
+        repr.to_html_by_part_of_speech('output.txt', 'a')
