@@ -34,7 +34,7 @@ class Data_Definition_html_representer():
                                 text(example)
                                 doc.stag('br')
                             # examples
-        A_file=open(path, file_open_modif)
-        A_file.write(doc.getvalue())
-        A_file.write('\n\n'+'='*100+'\n\n')
-        A_file.close()
+        with open(path, file_open_modif) as A_file:
+            A_file.write(doc.getvalue())
+            A_file.write('\n\n'+'='*100+'\n\n')
+            A_file.close()

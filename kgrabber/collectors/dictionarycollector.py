@@ -8,9 +8,9 @@ import urllib.request
 
 
 class Data():                   # TODO put this class higher in different
-    def __init__(self):
-        self.source = None      # type: str
-        self.data_type = None   # type: str | fsdfaw
+    def __init__(self, source, data_type):
+        self.source = source      # type: str
+        self.data_type = data_type   # type: str 
         self.data = []
 
     def get_data_as_df(self):
@@ -18,7 +18,8 @@ class Data():                   # TODO put this class higher in different
         returns: Pandas DataFrame consisting data.
         '''
         return pd.DataFrame([entry.get_data() for entry in self.data])
-
+    def __str__(self):
+        return 'Data object. Source:{}, Type:{}'.format(self.source,self.data_type)
 
 class Definition():
     def __init__(self):
@@ -42,29 +43,22 @@ class Definition():
 
 
 class Definition_Collector():
-    def __init__(self, words):
-        self.words = words      # self.words : list
-    def __load_data(self, link, word):
+    # self.words : list
+    def __load_data(self, link):
         time.sleep(random.randrange(1, 2))  # for not to ddos
-        raw_html = requests.get(link.format(word)).text  # 
+        raw_html = requests.get(link).text  # 
         return raw_html
 
-    def get_definitions(self, words):
-        '''Gets definitions from all dictionaries 
-        return: Data-type object'''
-        for word in words:
-            oxford_data = worcc_oxford(word, raw_html)
-            # here should be data from anothers dictionaries 
-        return 
-    
-    def __process_data(self, raw_html):
+    def __prepare_data(self, link, word):
+        raw_html = self.__load_data(link.format(word))
         parser = BeautifulSoup(raw_html, 'html.parser')
         return parser
     
-    def worcc_oxford(word):
-        raw_html = self.__load_data(word,'https://en.oxforddictionaries.com/definition')
-        parsed_data = Data()
-        parser= __process_data(raw_html)
+    def worcc_oxford(self, word):
+#        raw_html = self.__load_data('https://en.oxforddictionaries.com/definition', word)
+        link='https://en.oxforddictionaries.com'
+        parsed_data = Data(link, 'words_def')
+        parser= self.__prepare_data(link+'/definition/{}', word)
         sections = parser.find('div', 'entryWrapper').find_all(
             'section', 'gramb', recursive=False)
         for section in list(sections):
@@ -85,12 +79,28 @@ class Definition_Collector():
                     example.get_text() for example in definition.find_all('div', 'ex', limit=3)]
                 parsed_data.data.append(definition_var)
         return parsed_data
-
+    
+    def worcc_dictionarycom():  # TO-DO
+        link='http://www.dictionary.com'
+        parsed_data = Data(link, 'words_def')
+        parser= self.__prepare_data(link+'browse/{}',word)
+        sections = parser.find_all('section','css-1sdcacc e10vl5dg0'):
+        for section in list(setions):
+            definitions = section.find_all('li','css-2oywg7 e10vl5dg5')
+            # extract examples from list then get text by getText
+        return parsed_data
+    
+    def get_definitions(self, words):
+        '''Gets definitions from all dictionaries 
+        return: Data-type object'''
+        for word in words:
+            oxford_data = self.worcc_oxford(word)
+            # here should be data from anothers dictionaries 
+        return (oxford_data,)
+    
     def worcc_cambridge():      # TO-DO
         return 1
 
-    def worcc_dictionarycom():  # TO-DO
-        return 1
 
 # class Oxford_Word_Collector(Dictionary_Collector):
 #     def __init__(self):
