@@ -21,13 +21,14 @@ class Data():                   # TODO put this class higher in different
     def __str__(self):
         return 'Data object. Source:{}, Type:{}'.format(self.source,self.data_type)
 
-class Definition():
+class Definition(): # TODO remove all variables initialization from __init__ - replace them by docstring
     def __init__(self):
         self.word = None        # type: str
         self.part_of_speech = None  # type: str
         self.definition = None  # type: str 
         self.examples = []
         self.additional_info = 'No additional info'  # only for now
+        self.transcript = None
 
     def get_data(self):
         ''' returns: Dictionary with all data ''' 
@@ -37,7 +38,7 @@ class Definition():
             'definition': self.definition,
             'examples': self.examples,
             'additional_info': self.additional_info,
-            'transcript': None
+            'transcript': self.transcript
         }
         return data
 
@@ -80,13 +81,26 @@ class Definition_Collector():
                 parsed_data.data.append(definition_var)
         return parsed_data
     
-    def worcc_dictionarycom():  # TO-DO
+    def worcc_dictionarycom(self, word):  # TO-DO
         link='http://www.dictionary.com'
         parsed_data = Data(link, 'words_def')
-        parser= self.__prepare_data(link+'browse/{}',word)
-        sections = parser.find_all('section','css-1sdcacc e10vl5dg0'):
-        for section in list(setions):
+        parser= self.__prepare_data(link+'/browse/{}',word)
+        sections = parser.find_all('section','css-1sdcacc e10vl5dg0')
+        for section in list(sections):
             definitions = section.find_all('li','css-2oywg7 e10vl5dg5')
+            part_of_speech = section.find('header').getText()
+            for definition in list(definitions):
+                examples = definition.find_all('span','luna-example italic')
+                definition_var = Definition()
+                for example in list(examples):
+                    definition_var.examples.append(example.extract().getText())
+                definition_var.word = word
+                definition_var.part_of_speech = part_of_speech
+                definition_var.definition=definition.getText()
+                definition_var.examples=examples
+                parsed_data.data.append(definition_var)
+
+                
             # extract examples from list then get text by getText
         return parsed_data
     
@@ -95,8 +109,9 @@ class Definition_Collector():
         return: Data-type object'''
         for word in words:
             oxford_data = self.worcc_oxford(word)
+            dictcom_data = self.worcc_dictionarycom(word)
             # here should be data from anothers dictionaries 
-        return (oxford_data,)
+        return (dictcom_data, oxford_data)
     
     def worcc_cambridge():      # TO-DO
         return 1
