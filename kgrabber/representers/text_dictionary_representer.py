@@ -19,7 +19,7 @@ class Data_Definition_html_representer():
         doc, tag, text = Doc().tagtext()
         groups = self.data.groupby('part_of_speech')
         with tag('strong'):
-            text(', '.join(self.data.loc[:,'word'].unique()))
+            text(', '.join(self.data.loc[:, 'word'].unique()))
         for name, group in groups:
             with tag('div', style='margin-bottom:20px;'):
                 with tag('div'):
@@ -31,7 +31,8 @@ class Data_Definition_html_representer():
                         text(row['definition'])
                         with tag('div', style='padding-left:15px;color:#545454'):
                             for example in row['examples']:
-                                text(example)
+
+                                # text(example)
                                 doc.stag('br')
                             # examples
         with open(path, file_open_modif) as A_file:
