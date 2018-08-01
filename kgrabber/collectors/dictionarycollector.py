@@ -13,6 +13,16 @@ class Data():                   # TODO put this class higher in different
         self.data_type = data_type   # type: str
         self.data = []
 
+    def __add__(self, other):
+        if self.data_type != other.data_type:
+            raise ValueError('Data types not equal\n{} != {}'.format(self.data_type,other.data_type))
+
+        else:
+            data = self.data+other.data
+            source = [self.source,other.source]
+            result = Data(source, self.data_type)
+            result.data= data
+            return result
     def get_data_as_df(self):
         '''
         returns: Pandas DataFrame consisting data.
@@ -57,64 +67,82 @@ class Definition_Collector():
         parser = BeautifulSoup(raw_html, 'html.parser')
         return parser
 
+    def _not_found(self, word):
+        defen = Definition()
+        defen.word = word
+        defen.definition = 'Defenition have not been found'
+        defen.examples = ['None']
+        defen.part_of_speech = 'None'
+        return defen
+
     def worcc_oxford(self, word):
         #        raw_html = self.__load_data('https://en.oxforddictionaries.com/definition', word)
         link = 'https://en.oxforddictionaries.com'
         parsed_data = Data(link, 'words_def')
         parser = self.__prepare_data(link+'/definition/{}', word)
-        sections = parser.find('div', 'entryWrapper').find_all(
-            'section', 'gramb', recursive=False)
-        for section in list(sections):
-            definitions = section.find(
-                'ul', 'semb').find_all('li', recursive=False)
-            for definition in list(definitions):
-                definition_var = Definition()
-                definition_var.word = word
-                definition_var.part_of_speech = section.find(
-                    'span', 'pos').get_text()
-                definition_var.definition = definition.find('p').get_text()
-                try:
-                    if definition_var.definition[0].isdigit():
-                        definition_var.definition = definition_var.definition[1:]
-                except IndexError:
-                    definition_var.definition = 'No definition'
-                definition_var.examples = [
-                    example.get_text() for example in definition.find_all('div', 'ex', limit=3)]
-                parsed_data.data.append(definition_var)
+        head_no_data = parser.find('h2','searchHeading')
+        if head_no_data and 'No exact matches found for' in head_no_data.getText():
+            definition_var = self._not_found(word)
+            parsed_data.data.append(definition_var)
+        else:
+            sections = parser.find('div', 'entryWrapper').find_all(
+                'section', 'gramb', recursive=False)
+            for section in list(sections):
+                definitions = section.find(
+                    'ul', 'semb').find_all('li', recursive=False)
+                for definition in list(definitions):
+                    definition_var = Definition()
+                    definition_var.word = word
+                    definition_var.part_of_speech = section.find(
+                        'span', 'pos').get_text()
+                    definition_var.definition = definition.find('p').get_text()
+                    try:
+                        if definition_var.definition[0].isdigit():
+                            definition_var.definition = definition_var.definition[1:]
+                    except IndexError:
+                        definition_var.definition = 'No definition'
+                    definition_var.examples = [
+                        example.get_text() for example in definition.find_all('div', 'ex', limit=3)]
+                    parsed_data.data.append(definition_var)
         return parsed_data
 
     def worcc_dictionarycom(self, word):  # TO-DO
         link = 'http://www.dictionary.com'
         parsed_data = Data(link, 'words_def')
         parser = self.__prepare_data(link+'/browse/{}', word)
-        sections = parser.find_all('section', 'css-1sdcacc e10vl5dg0')
-        for section in list(sections):
-            definitions = section.find_all('li', 'css-2oywg7 e10vl5dg5')
-            part_of_speech = section.find('header').find('span').get_text()
-            for definition in list(definitions):
-                examples = definition.find(
-                    'span', 'luna-example italic')
-                examples = examples.find_all(text=True) if examples != None else ['None']
-                definition = definition.find('span')
-                definition_var = Definition()
-                definition_var.examples.append(examples)
-                definition_var.word = word
-                definition_var.part_of_speech = part_of_speech
-                definition_var.definition = definition.get_text()
-                definition_var.examples = examples
-                parsed_data.data.append(definition_var)
-                
+        head_no_data = parser.find('h2','searchHeading')
+        if head_no_data and 'No results found' in head_no_data.getText():
+            definition_var = self._not_found(word)
+            parsed_data.data.append(definition_var)
+        else:
+            sections = parser.find_all('section', 'css-1sdcacc e10vl5dg0')
+            for section in list(sections):
+                definitions = section.find_all('li', 'css-2oywg7 e10vl5dg5')
+                part_of_speech = section.find('header').find('span').get_text()
+                for definition in list(definitions):
+                    examples = definition.find(
+                        'span', 'luna-example italic')
+                    examples = examples.find_all(
+                        text=True) if examples != None else ['None']
+                    definition = definition.find('span')
+                    definition_var = Definition()
+                    definition_var.examples.append(examples)
+                    definition_var.word = word
+                    definition_var.part_of_speech = part_of_speech
+                    definition_var.definition = definition.get_text()
+                    definition_var.examples = examples
+                    parsed_data.data.append(definition_var)
             # extract examples from list then get text by getText
         return parsed_data
 
     def get_definitions(self, words):
         '''Gets definitions from all dictionaries 
         return: Data-type object'''
+        data=[]
         for word in words:
-            oxford_data = self.worcc_oxford(word)
-            dictcom_data = self.worcc_dictionarycom(word)
+            data.append(self.worcc_oxford(word)+self.worcc_dictionarycom(word))
             # here should be data from anothers dictionaries
-        return (dictcom_data, oxford_data)
+        return data
 
     def worcc_cambridge():      # TO-DO
         return 1

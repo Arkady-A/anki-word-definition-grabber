@@ -31,9 +31,9 @@ class Data_Definition_html_representer():
                         text(row['definition'])
                         with tag('div', style='padding-left:15px;color:#545454'):
                             for example in row['examples']:
-
-                                # text(example)
-                                doc.stag('br')
+                                if example!='None':
+                                    text(example)
+                                    doc.stag('br')
                             # examples
         with open(path, file_open_modif) as A_file:
             A_file.write(doc.getvalue())
