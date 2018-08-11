@@ -106,7 +106,7 @@ class Definition_Collector():
                     parsed_data.data.append(definition_var)
         return parsed_data
 
-    def worcc_dictionarycom(self, word):  # TO-DO
+    def worcc_dictionarycom(self, word): 
         link = 'http://www.dictionary.com'
         parsed_data = Data(link, 'words_def')
         parser = self.__prepare_data(link+'/browse/{}', word)
@@ -122,8 +122,13 @@ class Definition_Collector():
                 for definition in list(definitions):
                     examples = definition.find(
                         'span', 'luna-example italic')
-                    examples = examples.find_all(
-                        text=True) if examples != None else ['None']
+                    if examples != None:
+                        
+                        examples = examples.find_all(
+                            text=True)
+                        definition.find('span','luna-example italic').decompose()
+                    else:
+                        examples = ['None']
                     definition = definition.find('span')
                     definition_var = Definition()
                     definition_var.examples.append(examples)
