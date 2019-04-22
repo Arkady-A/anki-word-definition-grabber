@@ -1,4 +1,4 @@
-# Customizable Grabber
+# Word grabber for anki
 Script for grabbing definitions of words from varios dictionaries.
 
 #  v0.1 upcoming features
