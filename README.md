@@ -1,16 +1,14 @@
 # Customizable Grabber
-Easy scalable script for grabbing various data. 
+Script for grabbing definitions of words from varios dictionaries.
 
 #  v0.1 upcoming features
 * ~~Oxford~~/Cambridge/Dictionary.com scrabbers
 * ~~HTML representer~~
 
 #  before v1.0 goals
-* If word dosen't found - print list of suggestions
-* Definitions choice (which you want to leave)
+* If word haven't been found - print list of suggestions for the user to choose
 
 # v1.0 goals
-* Avito.ru scrabber
 * Words definition direct export to ANKI
 * Create as a package. 
 
