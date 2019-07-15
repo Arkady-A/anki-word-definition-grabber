@@ -1,4 +1,5 @@
 # Word grabber for anki
+**This script is not mantined. New repository: https://github.com/Arkady-A/AnkiWordGrabber**
 Script for grabbing definitions of words from varios dictionaries.
 
 #  v0.1 upcoming features
